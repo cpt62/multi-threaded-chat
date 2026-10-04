@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientHandler {
@@ -40,6 +42,12 @@ public class ClientHandler {
         }
     }
 
+    private String getTime() {
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+        return dateTime.format(formatter);
+    }
+
     public void clientHandlerFlow() {
         try {
             this.name = this.br.readLine();
@@ -48,7 +56,7 @@ public class ClientHandler {
                 return;
             }
             concurrentHashMap.putIfAbsent(name, this);
-            pw.println("Клиент " + name + " в сети");
+            pw.println(getTime() + " | Клиент " + name + " в сети");
             while (!isClosed) {
                 String msg;
                 if ((msg = br.readLine()) != null) {
@@ -56,10 +64,9 @@ public class ClientHandler {
                     if (msg.equals("/exit")) break;
                     concurrentHashMap
                             .values()
-                            .stream()
                             .forEach(ch -> {
                                 if (!ch.name.equals(this.name))
-                                    ch.pw.println(msg);
+                                    ch.pw.println(getTime() + " | " + name + " | " + msg);
                             });
                 }
             }

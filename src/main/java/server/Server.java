@@ -75,7 +75,7 @@ public class Server {
                 if (!isRunning) {
                     System.out.println("Сервер остановлен");
                 } else {
-                    throw new RuntimeException(e.getMessage());
+                    throw new RuntimeException("Сбой работы сервера!");
                 }
             }
         }
