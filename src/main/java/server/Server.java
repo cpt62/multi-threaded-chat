@@ -1,7 +1,8 @@
 package server;
 
 import service.Configurator;
-
+import service.logger.Events;
+import service.logger.Logger;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,6 +23,7 @@ public class Server {
     private InetAddress host;
     private int port;
     private int backlog;
+    private Logger logger;
 
     // Приватный конструктор, обеспечиваем работу с единственным экземпляром
     private Server() {
@@ -34,6 +36,7 @@ public class Server {
         this.concurrentHashMap = new ConcurrentHashMap<>();
         System.out.println("Server started. Listen port: 8080 ...");
         executorService = Executors.newFixedThreadPool(5);
+        this.logger = new Logger();
         isRunning = true;
     }
 
@@ -65,15 +68,16 @@ public class Server {
         while (isRunning) {
             ClientHandler clientHandler = null;
             Socket socket = null;
+            logger.captureEvent(Events.SERVER_STARTED, "Сервер запущен");
             try {
                 socket = serverSocket.accept();
                 if (socket != null && isRunning) {
-                    clientHandler = new ClientHandler(socket, concurrentHashMap);
+                    clientHandler = new ClientHandler(socket, concurrentHashMap, logger);
                     executorService.submit(clientHandler::clientHandlerFlow);
                 }
             } catch (IOException e) {
                 if (!isRunning) {
-                    System.out.println("Сервер остановлен");
+                    logger.captureEvent(Events.SERVER_STOPPED, "Сервер остановлен");
                 } else {
                     throw new RuntimeException("Сбой работы сервера!");
                 }
@@ -89,16 +93,17 @@ public class Server {
             System.err.println("Сервер уже остановлен");
         }
         executorService.shutdown();
+
         try {
             if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
                 System.err.println("Пул не успел завершить свою работу. Принудительная остановка!");
                 executorService.shutdownNow();
+                logger.captureEvent(Events.SERVER_STOPPED, "Сервер остановлен");
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
-
     }
 
     public static void main(String[] args) {

@@ -80,7 +80,6 @@ public class Client {
         }
     }
 
-
     private void getPropertiesFromConfigFile() {
         Properties properties = new Properties();
 
@@ -103,7 +102,6 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         String name = scanner.nextLine();
         Client client = new Client(name);
-//        scanner.close();
         Thread thread = new Thread(client::start);
         thread.start();
     }
