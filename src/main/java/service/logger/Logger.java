@@ -12,11 +12,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Logger {
-    ConcurrentLinkedQueue<String> queue;
-    Path path;
-    Path file;
-    AtomicInteger counter;
-    long lastWriteTime;
+    private ConcurrentLinkedQueue<String> queue;
+    private Path path;
+    private Path file;
+    private AtomicInteger counter;
+    private long lastWriteTime;
 
     public Logger() {
         this.path = Path.of("logs");
