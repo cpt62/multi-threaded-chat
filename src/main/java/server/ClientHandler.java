@@ -3,11 +3,9 @@ package server;
 import service.logger.Events;
 import service.logger.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +28,8 @@ public class ClientHandler {
         this.concurrentHashMap = concurrentHashMap;
         this.logger = logger;
         try {
-            this.pw = new PrintWriter(socket.getOutputStream(), true);
-            this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            this.br = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -78,9 +76,6 @@ public class ClientHandler {
                             });
                 }
             }
-            stop();
-            logger.captureEvent(Events.CLIENT_DISCONNECTED, "Клиент: " + name + " отключен");
-            concurrentHashMap.remove(name);
         } catch (IOException e) {
             if (this.socket.isClosed()) {
                 if (name != null) {
@@ -96,7 +91,9 @@ public class ClientHandler {
             }
         } finally {
             if (name != null)
-                concurrentHashMap.remove(name);
+                stop();
+            logger.captureEvent(Events.CLIENT_DISCONNECTED, "Клиент: " + name + " отключен");
+            concurrentHashMap.remove(name);
         }
     }
 

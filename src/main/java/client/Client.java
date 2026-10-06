@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -22,9 +23,9 @@ public class Client {
         try {
             this.socket = new Socket(host, port);
             this.name = name;
-            console = new BufferedReader(new InputStreamReader(System.in));
-            pw = new PrintWriter(socket.getOutputStream(), true);
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            console = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
             isRunning = true;
         } catch (IOException e) {
             throw new RuntimeException("Неудачная попытка соединения с сервером");
@@ -104,5 +105,10 @@ public class Client {
         Client client = new Client(name);
         Thread thread = new Thread(client::start);
         thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

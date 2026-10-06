@@ -89,7 +89,7 @@ public class Logger {
 
     private String getTime() {
         var dateRaw = LocalDateTime.now();
-        var formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return dateRaw.format(formatter);
     }
 
